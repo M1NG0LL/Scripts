@@ -4,15 +4,20 @@ echo "Starting Ping Test Tool..."
 servers=()
 
 for i in {1..5}; do
-    read -p "Enter server $i hostname or IP: " srv
-    if [[ -z "$srv" || 
-        ! "$srv" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ && 
-        ! "$srv" =~ ^[a-zA-Z0-9.-]+$ ]]; then
-        echo "Invalid hostname or IP. Try again."
-        ((i--))
-        continue
-    fi
-    servers+=("$srv")
+    while true; do
+        read -p "Enter server $i hostname, IP, or URL: " srv
+        if [[ $srv =~ ^https?:// ]]; then
+            srv=$(echo "$srv" | sed 's|^https\?://||' | cut -d'/' -f1)
+        fi
+        if [[ -z "$srv" || 
+              ! "$srv" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ && 
+              ! "$srv" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+            echo "Invalid hostname or IP. Try again."
+        else
+            servers+=("$srv")
+            break
+        fi
+    done
 done
 
 echo "Pinging your 5 servers..."
